@@ -13,17 +13,40 @@ add_executable(Courseselect
     main.cpp
 )
 
-set(MODULE_INTERFACE_FILES
+# 定义用户管理相关模块文件集合
+set(UserManage_FILES
     #${MODULE_LIB_DIR1}/utils.cppm         #添加模块库的模块接口单元
     #math.cppm                             # 模块接口单元
 )
 
-source_group("Module Interfaces" FILES ${MODULE_INTERFACE_FILES})
+# 定义课程管理相关模块文件集合
+set(CourseManage_FILES
+    #${MODULE_LIB_DIR1}/utils.cppm         #添加模块库的模块接口单元
+    #math.cppm                             # 模块接口单元
+)
+
+# 定义注册管理相关模块文件集合
+set(Registration_FILES
+    #${MODULE_LIB_DIR1}/utils.cppm         #添加模块库的模块接口单元
+    #math.cppm                             # 模块接口单元
+)
+
+# 定义系统相关模块文件集合
+set(System_FILES
+    #${MODULE_LIB_DIR1}/utils.cppm         #添加模块库的模块接口单元
+    #math.cppm                             # 模块接口单元
+)
+
+
+source_group("UserManage Files" FILES ${UserManage_FILES})
+source_group("CourseManage Files" FILES ${CourseManage_FILES})
+source_group("Registration Files" FILES ${Registration_FILES})
+source_group("System Files" FILES ${System_FILES})
 target_sources(Courseselect  PRIVATE FILE_SET cxx_modules TYPE CXX_MODULES
     BASE_DIRS                              # 配置BASE_DIRS，用于组织构建输出目录，以便构建不同目录中(同名的)模块文件.
         #${MODULE_LIB_DIR1}
         ${CMAKE_CURRENT_SOURCE_DIR}
-    FILES ${MODULE_INTERFACE_FILES}
+    FILES ${UserManage_FILES} ${CourseManage_FILES} ${Registration_FILES} ${System_FILES}
 )
 target_compile_features(Courseselect PRIVATE cxx_std_23)
 
