@@ -1,3 +1,8 @@
+// Module
+// File: datamanager_memory.cppm   Version: 0.1.0   License: AGPLv3
+// Created:Wang Qingming,Huang Yulin,Li Lin       2026-01-19 10:04:57
+// Description:
+//
 export module registrar:datamanager_interface;
 import :student;
 import :course;
