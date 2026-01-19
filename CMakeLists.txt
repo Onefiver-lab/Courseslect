@@ -11,15 +11,13 @@ project(Courseselect LANGUAGES CXX)
 add_executable(Courseselect
     #math.cpp                              # 模块实现单元
     main.cpp
+    entity.cpp
 )
 
 # 定义用户管理相关模块文件集合
 set(UserManage_FILES
     #${MODULE_LIB_DIR1}/utils.cppm         #添加模块库的模块接口单元
     #math.cppm                             # 模块接口单元
-    student.cppm
-    teacher.cppm
-    secretary.cppm
     major.cppm
 
 )
@@ -28,7 +26,6 @@ set(UserManage_FILES
 set(CourseManage_FILES
     #${MODULE_LIB_DIR1}/utils.cppm         #添加模块库的模块接口单元
     #math.cppm                             # 模块接口单元
-    course.cppm
 )
 
 # 定义注册管理相关模块文件集合
@@ -36,7 +33,6 @@ set(Registration_FILES
     #${MODULE_LIB_DIR1}/utils.cppm         #添加模块库的模块接口单元
     #math.cppm                             # 模块接口单元
     registration.cppm
-    iregistrar.cppm
     datamanager_memery.cppm
     datamanager_interface.cppm
     registrar.cpp
