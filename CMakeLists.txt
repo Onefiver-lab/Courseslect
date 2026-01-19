@@ -11,49 +11,44 @@ project(Courseselect LANGUAGES CXX)
 add_executable(Courseselect
     #math.cpp                              # 模块实现单元
     main.cpp
-    entity.cpp
+
 )
 
 # 定义用户管理相关模块文件集合
-set(UserManage_FILES
+set(domain_FILES
     #${MODULE_LIB_DIR1}/utils.cppm         #添加模块库的模块接口单元
     #math.cppm                             # 模块接口单元
     major.cppm
+    entity.cpp
 
 )
 
 # 定义课程管理相关模块文件集合
-set(CourseManage_FILES
+set(database_FILES
     #${MODULE_LIB_DIR1}/utils.cppm         #添加模块库的模块接口单元
     #math.cppm                             # 模块接口单元
+    datamanager_memery.cppm
+    datamanager_interface.cppm
 )
 
 # 定义注册管理相关模块文件集合
-set(Registration_FILES
+set(controller_FILES
     #${MODULE_LIB_DIR1}/utils.cppm         #添加模块库的模块接口单元
     #math.cppm                             # 模块接口单元
     registration.cppm
-    datamanager_memery.cppm
-    datamanager_interface.cppm
     registrar.cpp
 )
 
-# 定义系统相关模块文件集合
-set(System_FILES
-    #${MODULE_LIB_DIR1}/utils.cppm         #添加模块库的模块接口单元
-    #math.cppm                             # 模块接口单元
-)
 
 
-source_group("UserManage Files" FILES ${UserManage_FILES})
-source_group("CourseManage Files" FILES ${CourseManage_FILES})
-source_group("Registration Files" FILES ${Registration_FILES})
-source_group("System Files" FILES ${System_FILES})
+source_group("domain Files" FILES ${domain_FILES})
+source_group("database Files" FILES ${database_FILES})
+source_group("controller Files" FILES ${controller_FILES})
 target_sources(Courseselect  PRIVATE FILE_SET cxx_modules TYPE CXX_MODULES
     BASE_DIRS                              # 配置BASE_DIRS，用于组织构建输出目录，以便构建不同目录中(同名的)模块文件.
         #${MODULE_LIB_DIR1}
         ${CMAKE_CURRENT_SOURCE_DIR}
-    FILES ${UserManage_FILES} ${CourseManage_FILES} ${Registration_FILES} ${System_FILES}
+    FILES ${domain_FILES} ${database_FILES} ${controller_FILES}
 )
 target_compile_features(Courseselect PRIVATE cxx_std_23)
 
