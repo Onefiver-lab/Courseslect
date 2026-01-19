@@ -11,6 +11,7 @@ project(Courseselect LANGUAGES CXX)
 add_executable(Courseselect
     #math.cpp                              # 模块实现单元
     main.cpp
+    registrar.cpp
 
 
 
