@@ -1,85 +1,100 @@
-// Module
-// File: datamanager_memory.cppm   Version: 0.1.0   License: AGPLv3
-// Created:Wang Qingming,Huang Yulin,Li Lin       2026-01-19 11:04:57
-// Description:
-//
 export module registrar:datamanager_memory;
 import :datamanager_interface;
-import :student;
-import :course;
-import :teacher;
-import :secretary;
+import :entity; // 仅导入公共模块
+
 import std;
-using std::string;
-using std::vector;
+
 using std::find_if;
 
 export class DataManagerMemory : public DataManager {
 public:
     // 学生操作
-    void addStudent(Student* student) override {
+    void addStudent(SharedStudent student) override {
         if (!getStudentById(student->getId())) {
             m_students.push_back(student);
         }
     }
 
-    Student* getStudentById(string id) override {
+    SharedStudent getStudentById(std::string id) override {
         auto it = find_if(m_students.begin(), m_students.end(),
-            [&id](Student* s) { return s->hasId(id); });
+            [&id](const SharedStudent& s) { return s->hasId(id); });
         return it != m_students.end() ? *it : nullptr;
     }
 
-    vector<Student*> getAllStudents() override { return m_students; }
+    StudentList getAllStudents() override { return m_students; }
 
     // 课程操作
-    void addCourse(Course* course) override {
+    void addCourse(SharedCourse course) override {
         if (!getCourseById(course->getId())) {
             m_courses.push_back(course);
         }
     }
 
-    Course* getCourseById(string id) override {
+    SharedCourse getCourseById(std::string id) override {
         auto it = find_if(m_courses.begin(), m_courses.end(),
-            [&id](Course* c) { return c->hasId(id); });
+            [&id](const SharedCourse& c) { return c->hasId(id); });
         return it != m_courses.end() ? *it : nullptr;
     }
 
-    vector<Course*> getAllCourses() override { return m_courses; }
+    CourseList getAllCourses() override { return m_courses; }
 
     // 教师操作
-    void addTeacher(Teacher* teacher) override {
+    void addTeacher(SharedTeacher teacher) override {
         if (!getTeacherById(teacher->getId())) {
             m_teachers.push_back(teacher);
         }
     }
 
-    Teacher* getTeacherById(string id) override {
+    SharedTeacher getTeacherById(std::string id) override {
         auto it = find_if(m_teachers.begin(), m_teachers.end(),
-            [&id](Teacher* t) { return t->hasId(id); });
+            [&id](const SharedTeacher& t) { return t->hasId(id); });
         return it != m_teachers.end() ? *it : nullptr;
     }
 
-    vector<Teacher*> getAllTeachers() override { return m_teachers; }
+    std::vector<SharedTeacher> getAllTeachers() override { return m_teachers; }
 
     // 秘书操作
-    void addSecretary(Secretary* secretary) override {
+    void addSecretary(SharedSecretary secretary) override {
         if (!getSecretaryById(secretary->getId())) {
             m_secretaries.push_back(secretary);
         }
     }
 
-    Secretary* getSecretaryById(string id) override {
+    SharedSecretary getSecretaryById(std::string id) override {
         auto it = find_if(m_secretaries.begin(), m_secretaries.end(),
-            [&id](Secretary* s) { return s->hasId(id); });
+            [&id](const SharedSecretary& s) { return s->hasId(id); });
         return it != m_secretaries.end() ? *it : nullptr;
     }
 
-    // 数据持久化（内存版无实际操作，返回true）
-    bool saveData() override { return true; }
+    // 数据持久化（JSON文件存储）
+    bool saveData() override {
+        std::ofstream f("data.json");
+        if (!f.is_open()) return false;
+
+        f << "{" << std::endl;
+        f << "  \"students\": [";
+        for (std::size_t i = 0; i < m_students.size(); i++) {
+            f << "{\"id\":\"" << m_students[i]->getId() << "\",\"name\":\"" << m_students[i]->getName() << "\"}";
+            if (i != m_students.size() - 1) f << ",";
+        }
+        f << "]," << std::endl;
+
+        f << "  \"courses\": [";
+        for (std::size_t i = 0; i < m_courses.size(); i++) {
+            f << "{\"id\":\"" << m_courses[i]->getId() << "\",\"name\":\"" << m_courses[i]->getName()
+              << "\",\"credits\":" << m_courses[i]->getCredits() << "}";
+            if (i != m_courses.size() - 1) f << ",";
+        }
+        f << "]" << std::endl;
+        f << "}" << std::endl;
+
+        f.close();
+        return true;
+    }
 
 private:
-    vector<Student*> m_students;
-    vector<Course*> m_courses;
-    vector<Teacher*> m_teachers;
-    vector<Secretary*> m_secretaries;
+    StudentList m_students;
+    CourseList m_courses;
+    std::vector<SharedTeacher> m_teachers;
+    std::vector<SharedSecretary> m_secretaries;
 };

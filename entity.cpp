@@ -2,7 +2,7 @@
 export module registrar:entity;
 import std;
 
-
+// 必须引入的标准库模板（部分编译器对std模块的自动导入支持不全）
 using std::string;
 using std::vector;
 using std::map;
@@ -29,6 +29,20 @@ private:
     string m_name;
 };
 
+// ===================== 泛化类 User =====================
+// 【泛化设计】User 作为 Student/Teacher/Secretary 的泛化基类
+// 仅用于设计层面的泛化说明，无实际业务逻辑扩展，不对外提供额外接口
+// 所有子类的核心逻辑仍保持独立，仅继承该类标识泛化关系
+export class User : public BaseEntity {
+public:
+    // 构造函数透传 BaseEntity 的 id/name，保持与原有逻辑一致
+    User(string id, string name) : BaseEntity(std::move(id), std::move(name)) {}
+    // 析构函数默认，不新增任何虚函数或成员变量
+    virtual ~User() = default;
+
+    // 无额外接口，完全复用 BaseEntity 的能力，仅作为泛化标识
+};
+
 // 提前声明类（解决类内部互相引用的问题）
 export class Course;
 export class Student;
@@ -43,10 +57,14 @@ export using SharedSecretary = shared_ptr<Secretary>;
 export using StudentList = vector<SharedStudent>;
 export using CourseList = vector<SharedCourse>;
 
-
-export class Student : public BaseEntity, public enable_shared_from_this<Student> {
+// 【关键修正1：调整类定义顺序】
+// 先定义无依赖的类，再定义有交叉依赖的类，避免"未完整定义"报错
+// 1. 学生类（依赖Course，后定义Course，需确保调用时Course已完整）
+// 学生类（修正后，无类型不匹配问题）
+// 【核心修改】继承泛化类 User（而非直接继承 BaseEntity），接口/实现完全不变
+export class Student : public User, public enable_shared_from_this<Student> {
 public:
-    Student(string id, string name) : BaseEntity(std::move(id), std::move(name)) {}
+    Student(string id, string name) : User(std::move(id), std::move(name)) {}
 
     string info() const override {
         return format("学生ID: {}, 姓名: {}\n", getId(), getName());
@@ -60,20 +78,18 @@ public:
 
     string schedule(); // 仅声明，延后实现
 
-
+    // 【修正：命名正确+类型匹配，返回课程列表（CourseList）的const引用】
     const CourseList& getCourses() const { return _courses; }
 
 private:
     CourseList _courses; // 成员变量是课程列表，对应getCourses()
 };
 
-
-
-
-// 2. 教师类
-export class Teacher : public BaseEntity, public enable_shared_from_this<Teacher> {
+// 2. 教师类（依赖Course，同理，复杂函数延后实现）
+// 【核心修改】继承泛化类 User（而非直接继承 BaseEntity），接口/实现完全不变
+export class Teacher : public User, public enable_shared_from_this<Teacher> {
 public:
-    Teacher(string id, string name) : BaseEntity(std::move(id), std::move(name)) {}
+    Teacher(string id, string name) : User(std::move(id), std::move(name)) {}
 
     string info() const override {
         return format("教师ID: {}, 姓名: {}", getId(), getName());
@@ -93,7 +109,7 @@ private:
     CourseList m_courses;
 };
 
-// 3. 课程类
+// 3. 课程类（被Student/Teacher依赖，优先完整定义，无前置依赖）
 export class Course : public BaseEntity, public enable_shared_from_this<Course> {
 public:
     Course(string id, string name, int credits)
@@ -160,10 +176,11 @@ private:
     }
 };
 
-// 4. 秘书类
-export class Secretary : public BaseEntity, public enable_shared_from_this<Secretary> {
+// 4. 秘书类（依赖Course/Teacher，已完整定义，可正常实现）
+// 【核心修改】继承泛化类 User（而非直接继承 BaseEntity），接口/实现完全不变
+export class Secretary : public User, public enable_shared_from_this<Secretary> {
 public:
-    Secretary(string id, string name) : BaseEntity(std::move(id), std::move(name)) {}
+    Secretary(string id, string name) : User(std::move(id), std::move(name)) {}
 
     string info() const override {
         return format("秘书ID: {}, 姓名: {}", getId(), getName());
@@ -180,7 +197,8 @@ public:
     }
 };
 
-
+// 【关键修正3：延后实现有交叉依赖的成员函数】
+// 此时Course已完整定义，Student::schedule()可正常调用Course::info()
 inline string Student::schedule() {
     string scheduleStr;
     for (const auto& course : _courses) {
@@ -189,7 +207,7 @@ inline string Student::schedule() {
     return scheduleStr.empty() ? "暂无选课\n" : scheduleStr;
 }
 
-
+// 延后实现Teacher::gradeStudent()，此时Course已完整定义
 inline bool Teacher::gradeStudent(SharedCourse course, SharedStudent student, string grade) {
     if (course->getTeacher() != shared_from_this()) return false;
     auto& students = course->getStudents();
@@ -197,7 +215,7 @@ inline bool Teacher::gradeStudent(SharedCourse course, SharedStudent student, st
     return course->assignGrade(student, std::move(grade));
 }
 
-// 全局共享成绩校验工具函数
+// 全局共享成绩校验工具函数（可选，供外部调用）
 export bool isValidGrade(const string& grade) {
     if (grade == "A" || grade == "B" || grade == "C" || grade == "D" || grade == "F") {
         return true;
