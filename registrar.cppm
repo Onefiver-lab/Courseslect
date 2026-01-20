@@ -54,7 +54,7 @@ int readInt(const string& prompt) {
         } else {
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            print("输入无效，请输入数字！");
+            print("输入无效，请输入数字！\n");
         }
     }
 }
@@ -70,22 +70,22 @@ Registrar::Registrar() {
 #endif
             initDefaultUsers();
         } catch (const std::exception& e) {
-            print("系统初始化失败：",e.what());
+            print("系统初始化失败：",e.what(), "\n");
             std::exit(1);
         }
 }
 
 // 系统主循环
 int Registrar::exec() {
-    print("===== 选课系统 =====");
+    print("===== 选课系统 =====\n");
     while (true) {
         int choice = readInt("\n1.学生 2.教师 3.教学秘书 0.退出\n请选择：");
         switch (choice) {
             case 1: studentMenu(); break;
             case 2: teacherMenu(); break;
             case 3: secretaryMenu(); break;
-            case 0: print("再见！"); return 0;
-            default: print("无效选项！");
+            case 0: print("再见！\n"); return 0;
+            default: print("无效选项！\n");
         }
     }
 }
@@ -124,10 +124,10 @@ void Registrar::initDefaultUsers() {
         }
 
         if (!m_dataManager->saveData()) {
-            print("默认数据保存失败！");
+            print("默认数据保存失败！\n");
         }
     } catch (const std::exception& e) {
-        print("默认用户初始化失败：",e.what());
+        print("默认用户初始化失败：",e.what(), "\n");
     }
 }
 
@@ -138,7 +138,7 @@ void Registrar::studentMenu() {
     string id;
     getline(cin, id);
     auto stu = m_dataManager->getStudentById(id);
-    if (!stu) { print("ID不存在！"); return; }
+    if (!stu) { print("ID不存在！\n"); return; }
 
     while (true) {
         int choice = readInt("\n1.查课程 2.选课 3.课表 4.成绩 0.返回\n选择：");
@@ -148,7 +148,7 @@ void Registrar::studentMenu() {
             case 3: cout << "个人课表：\n" << stu->schedule(); break;
             case 4: showStudentGrades(stu); break;
             case 0: return;
-            default: print("无效选项！");
+            default: print("无效选项！\n");
         }
     }
 }
@@ -160,7 +160,7 @@ void Registrar::teacherMenu() {
     string id;
     getline(cin, id);
     auto tea = m_dataManager->getTeacherById(id);
-    if (!tea) { print("ID不存在！"); return; }
+    if (!tea) { print("ID不存在！\n"); return; }
 
     while (true) {
         int choice = readInt("\n1.授课课程 2.录成绩 0.返回\n选择：");
@@ -168,7 +168,7 @@ void Registrar::teacherMenu() {
             case 1: showTeacherCourses(tea); break;
             case 2: inputStudentGrades(tea); break;
             case 0: return;
-            default: print("无效选项！");
+            default: print("无效选项！\n");
         }
     }
 }
@@ -180,7 +180,7 @@ void Registrar::secretaryMenu() {
     string id;
     getline(cin, id);
     auto sec = m_dataManager->getSecretaryById(id);
-    if (!sec) { print("ID不存在！"); return; }
+    if (!sec) { print("ID不存在！\n"); return; }
 
     while (true) {
         int choice = readInt("\n1.创建课程 2.分配教师 3.查课程 0.返回\n选择：");
@@ -189,7 +189,7 @@ void Registrar::secretaryMenu() {
             case 2: assignTeacherBySecretary(sec); break;
             case 3: showAllCourses(); break;
             case 0: return;
-            default: print("无效选项！");
+            default: print("无效选项！\n");
         }
     }
 }
@@ -198,7 +198,7 @@ void Registrar::secretaryMenu() {
 void Registrar::showAllCourses() {
     print("\n===== 所有课程 =====\n");
     auto courses = m_dataManager->getAllCourses();
-    if (courses.empty()) { print("暂无课程！"); return; }
+    if (courses.empty()) { print("暂无课程！\n"); return; }
     for (const auto& c : courses) cout << c->info();
 }
 
@@ -209,18 +209,18 @@ void Registrar::enrollCourse(SharedStudent stu) {
     string cid;
     getline(cin, cid);
     auto course = m_dataManager->getCourseById(cid);
-    if (!course) { print("课程不存在！"); return; }
+    if (!course) { print("课程不存在！\n"); return; }
 
     try {
         course->addStudent(stu);
         m_dataManager->addCourse(course);
         if (m_dataManager->saveData()) {
-            print("选课成功！");
+            print("选课成功！\n");
         } else {
-            print("选课成功，但数据保存失败！");
+            print("选课成功，但数据保存失败！\n");
         }
     } catch (const std::exception& e) {
-        print("选课失败：",e.what());
+        print("选课失败：",e.what(), "\n");
     }
 }
 
@@ -232,16 +232,16 @@ void Registrar::showStudentGrades(SharedStudent stu) {
     for (const auto& c : courses) {
         auto& stus = c->getStudents();
         if (find(stus.begin(), stus.end(), stu) != stus.end()) {
-            print("{}: 成绩{}", c->getName(), c->getGrade(stu));
+            print("{}: 成绩{}\n", c->getName(), c->getGrade(stu));
             hasGrade = true;
         }
     }
-    if (!hasGrade) print("暂无成绩！");
+    if (!hasGrade) print("暂无成绩！\n");
 }
 
 // 显示教师授课课程
 void Registrar::showTeacherCourses(SharedTeacher tea) {
-    print("\n===== 授课课程 ====\n");
+    print("\n===== 授课课程 =====\n");
     auto courses = m_dataManager->getAllCourses();
     bool hasCourse = false;
     for (const auto& c : courses) {
@@ -250,7 +250,7 @@ void Registrar::showTeacherCourses(SharedTeacher tea) {
             hasCourse = true;
         }
     }
-    if (!hasCourse) print("暂无授课课程！");
+    if (!hasCourse) print("暂无授课课程！\n");
 }
 
 // 教师录成绩
@@ -264,9 +264,9 @@ void Registrar::inputStudentGrades(SharedTeacher tea) {
 
     print("授课课程：\n");
     for (std::size_t i = 0; i < myCourses.size(); i++)
-        print("{}: {}", i + 1, myCourses[i]->getName());
+        print("{}: {}\n", i + 1, myCourses[i]->getName());
 
-    int idx = readInt("选择课程序号：\n");
+    int idx = readInt("选择课程序号：");
     if (idx < 1 || idx > myCourses.size()) { print("无效序号！\n"); return; }
     auto course = myCourses[idx - 1];
 
@@ -277,7 +277,7 @@ void Registrar::inputStudentGrades(SharedTeacher tea) {
     for (std::size_t i = 0; i < stus.size(); i++)
         cout << format("{}: {}", i + 1, stus[i]->info());
 
-    int stuIdx = readInt("选择学生序号：\n");
+    int stuIdx = readInt("选择学生序号：");
     if (stuIdx < 1 || stuIdx > stus.size()) { print("无效序号！\n"); return; }
     auto student = stus[stuIdx - 1];
 
@@ -321,7 +321,7 @@ void Registrar::createCourseBySecretary(SharedSecretary secretary) {
             print("课程创建成功，但数据保存失败！\n");
         }
     } catch (const invalid_argument& e) {
-        print("课程创建失败：\n",e.what());
+        print("课程创建失败：",e.what(), "\n");
     }
 }
 
@@ -358,5 +358,5 @@ void Registrar::showAllTeachers() {
     print("\n===== 所有教师 =====\n");
     auto teachers = m_dataManager->getAllTeachers();
     if (teachers.empty()) { print("暂无教师！\n"); return; }
-    for (const auto& t : teachers) cout << t->info() <<endl;
+    for (const auto& t : teachers) cout << t->info();
 }
